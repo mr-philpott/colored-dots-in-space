@@ -13,7 +13,7 @@ function Clear() {
 
 // consts
 
-const NEIGHBORS_DISTANCE = 50;
+const NEIGHBORS_DISTANCE = 100;
 
 // Common fucntions
 
@@ -75,6 +75,7 @@ class Point {
         this.position = { x, y };
         this.velocity = velocity;
         this.acceleration = new Vector(0, 0);
+        this.maxVelocity = 1;
         points.push(this);
     }
 
@@ -85,8 +86,14 @@ class Point {
         this.Overflow();
 
         this.velocity.Add(this.acceleration);
-        this.position.x += this.velocity.x;
-        this.position.y += this.velocity.y;
+        this.position.x +=
+            this.velocity.x > this.maxVelocity
+                ? this.maxVelocity
+                : this.velocity.x;
+        this.position.y +=
+            this.velocity.y > this.maxVelocity
+                ? this.maxVelocity
+                : this.velocity.y;
     }
 
     Neighbors() {
@@ -152,16 +159,26 @@ class Point {
         ctx.fill();
 
         for (let neigh of this.neighbors) {
-            ctx.beginPath();
-            ctx.lineTo(neigh.position.x, neigh.position.y);
-            ctx.stroke();
+            if (
+                Dist(
+                    this.position.x,
+                    this.position.y,
+                    neigh.position.x,
+                    neigh.position.y
+                ) < NEIGHBORS_DISTANCE
+            ) {
+                ctx.beginPath();
+                ctx.moveTo(this.position.x, this.position.y);
+                ctx.lineTo(neigh.position.x, neigh.position.y);
+                ctx.stroke();
+            }
         }
     }
 }
 
 let points = [];
 
-for (let i = 0; i < 100; i++) {
+for (let i = 0; i < 200; i++) {
     new Point(
         Math.random() * canvas.width,
         Math.random() * canvas.height,
