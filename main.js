@@ -13,7 +13,7 @@ function Clear() {
 
 // consts
 
-const NEIGHBORS_DISTANCE = 100;
+const NEIGHBORS_DISTANCE = 50;
 
 // Common fucntions
 
@@ -84,9 +84,9 @@ class Point {
         this.RunAway();
         this.Overflow();
 
+        this.velocity.Add(this.acceleration);
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
-        this.velocity.Add(this.acceleration);
     }
 
     Neighbors() {
@@ -109,18 +109,19 @@ class Point {
 
     RunAway() {
         for (let neigh of this.neighbors) {
-            this.acceleration.Add(
-                -1 /
-                    Dist(
-                        neigh.position.x,
-                        neigh.position.y,
-                        this.position.x,
-                        this.position.y
-                    )
+            let d = Dist(
+                neigh.position.x,
+                neigh.position.y,
+                this.position.x,
+                this.position.y
             );
+            let diff = new Vector(0, 0);
+            diff.x = (this.position.x - neigh.position.x) / d;
+            diff.y = (this.position.y - neigh.position.y) / d;
+            this.acceleration.Add(diff);
         }
         if (this.neighbors.length > 0) {
-            this.acceleration.Div(this.neighbors.length);
+            this.acceleration.Div(this.neighbors.length * 100);
         }
     }
 
@@ -149,6 +150,12 @@ class Point {
             2 * Math.PI
         );
         ctx.fill();
+
+        for (let neigh of this.neighbors) {
+            ctx.beginPath();
+            ctx.lineTo(neigh.position.x, neigh.position.y);
+            ctx.stroke();
+        }
     }
 }
 
@@ -158,7 +165,7 @@ for (let i = 0; i < 100; i++) {
     new Point(
         Math.random() * canvas.width,
         Math.random() * canvas.height,
-        new Vector(Math.random() * 2 * Math.PI, 1)
+        new Vector(Math.random() * 2 * Math.PI, 0.5)
     );
 }
 
@@ -169,8 +176,7 @@ function Run() {
             point.Update();
             point.Draw();
         }
-        console.log(points[0].neighbors);
-    }, 10);
+    }, 1);
 }
 
 Run();
