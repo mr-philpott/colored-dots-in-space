@@ -13,7 +13,7 @@ function Clear() {
 
 // consts
 
-const NEIGHBORS_DISTANCE = 100;
+const NEIGHBORS_DISTANCE = 250;
 
 // Common fucntions
 
@@ -86,14 +86,8 @@ class Point {
         this.Overflow();
 
         this.velocity.Add(this.acceleration);
-        this.position.x +=
-            this.velocity.x > this.maxVelocity
-                ? this.maxVelocity
-                : this.velocity.x;
-        this.position.y +=
-            this.velocity.y > this.maxVelocity
-                ? this.maxVelocity
-                : this.velocity.y;
+        this.position.x += this.velocity.x;
+        this.position.y += this.velocity.y;
     }
 
     Neighbors() {
@@ -128,7 +122,7 @@ class Point {
             this.acceleration.Add(diff);
         }
         if (this.neighbors.length > 0) {
-            this.acceleration.Div(this.neighbors.length * 100);
+            this.acceleration.Div(this.neighbors.length * 50);
         }
     }
 
@@ -159,17 +153,19 @@ class Point {
         ctx.fill();
 
         for (let neigh of this.neighbors) {
-            if (
-                Dist(
-                    this.position.x,
-                    this.position.y,
-                    neigh.position.x,
-                    neigh.position.y
-                ) < NEIGHBORS_DISTANCE
-            ) {
+            let d = Dist(
+                this.position.x,
+                this.position.y,
+                neigh.position.x,
+                neigh.position.y
+            );
+            if (d < NEIGHBORS_DISTANCE) {
                 ctx.beginPath();
                 ctx.moveTo(this.position.x, this.position.y);
                 ctx.lineTo(neigh.position.x, neigh.position.y);
+                ctx.strokeStyle = `rgba(0, 0, 0, ${
+                    1 - 1 * (d / NEIGHBORS_DISTANCE)
+                })`;
                 ctx.stroke();
             }
         }
@@ -178,7 +174,7 @@ class Point {
 
 let points = [];
 
-for (let i = 0; i < 200; i++) {
+for (let i = 0; i < 100; i++) {
     new Point(
         Math.random() * canvas.width,
         Math.random() * canvas.height,
@@ -193,7 +189,7 @@ function Run() {
             point.Update();
             point.Draw();
         }
-    }, 1);
+    }, 16.7);
 }
 
 Run();
